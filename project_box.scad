@@ -110,10 +110,10 @@ module project_box(x, y,
     nub_height = below + board_thickness + (nub_size/2) + (fit_tolerance*2);
     translate([0,board_y / 2 - nub_width / 2,nub_height])
       rotate([270,0,0])
-      cylinder(h=nub_width, r=1);
+      cylinder(h=nub_width, r=nub_size/2);
     translate([width,board_y / 2 - nub_width / 2,nub_height])
       rotate([270,0,0])
-      cylinder(h=nub_width, r=1);
+      cylinder(h=nub_width, r=nub_size/2);
   }
 }
 
