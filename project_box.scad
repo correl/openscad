@@ -1,8 +1,8 @@
 /* Project box
 
-A parametric box for perforated circuit boards. The board is held above the
-bottom of the box by four corner supports, and snaps into place to hold it
-snugly while allowing easy removal.
+A parametric box for electronics projects using perforated circuit boards. The
+board is held above the bottom of the box by four corner supports, and snaps
+into place to hold it snugly while allowing easy removal.
 */
 
 $fn=50;

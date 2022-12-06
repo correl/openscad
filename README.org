@@ -1,0 +1,9 @@
+#+title: OpenSCAD Models
+#+options: toc:nil
+
+My collection of 3D-printable models designed using [[https://openscad.org/][OpenSCAD]].
+
+* [[file:project_box.scad][Project Box]]
+A parametric box for electronics projects using perforated circuit boards. The
+board is held above the bottom of the box by four corner supports, and snaps
+into place to hold it snugly while allowing easy removal.
