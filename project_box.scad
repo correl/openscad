@@ -9,13 +9,13 @@ $fn=50;
 
 board_x = 50;
 board_y = 70;
-board_thickness = 1; // [1:10]
-clearance_above = 20; // [5:50]
-clearance_below = 10; // [5:50]
+board_thickness = 1;   // [1:10]
+clearance_above = 20;  // [5:50]
+clearance_below = 10;  // [5:50]
 fit_tolerance = 0.5;
-corner_radius=3; // [1:10]
-support_radius=5; // [1:10]
-wall_width=3; // [3:10]
+corner_radius=3;       // [1:10]
+support_radius=5;      // [1:10]
+wall_width=3;          // [3:10]
 
 module _rounded_box(h, w, d, r) {
   hull() {
@@ -40,35 +40,22 @@ module corner_post(h, r) {
 }
 
 module lid_base(x, y, z, slot_depth=1.5) {
-  /*
-  cube([10,7,5]);
-  CubePoints = [
-  [  0,  0,  0 ],  //0
-  [ 10,  0,  0 ],  //1
-  [ 10,  7,  0 ],  //2
-  [  0,  7,  0 ],  //3
-  [  0,  0,  5 ],  //4
-  [ 10,  0,  5 ],  //5
-  [ 10,  7,  5 ],  //6
-  [  0,  7,  5 ]]; //7
-  */
-  color("red")
-    polyhedron([// bottom
-                [0, 0, 0],
-                [x, 0, 0],
-                [x, y, 0],
-                [0, y, 0],
-                // top
-                [slot_depth, 0, z],
-                [x - slot_depth, 0, z],
-                [x - slot_depth, y, z],
-                [slot_depth, y, z]],
-               [[0,1,2,3],
-                [4,5,1,0],
-                [7,6,5,4],
-                [5,6,2,1],
-                [6,7,3,2],
-                [7,4,0,3]]);
+  polyhedron([// bottom face
+              [0, 0, 0],
+              [x, 0, 0],
+              [x, y, 0],
+              [0, y, 0],
+              // top face
+              [slot_depth, 0, z],
+              [x - slot_depth, 0, z],
+              [x - slot_depth, y, z],
+              [slot_depth, y, z]],
+             [[0,1,2,3],
+              [4,5,1,0],
+              [7,6,5,4],
+              [5,6,2,1],
+              [6,7,3,2],
+              [7,4,0,3]]);
 }
 
 module project_box(x, y,
