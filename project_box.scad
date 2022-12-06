@@ -64,13 +64,15 @@ module lid(x, y, z, slot_depth=1.5, wall_width=3, fit_tolerance=0.5) {
   difference() {
     union() {
       lid_base(x, y, z, slot_depth);
+      // locking tab
       translate([x / 2 - indent_width / 2 - fit_tolerance, y - wall_width - fit_tolerance, 0])
         rotate([0, 90, 0])
         cylinder(h=x / 4, r=2*fit_tolerance);
     }
-    translate([x / 2 - indent_width / 2 - fit_tolerance, y - wall_width - fit_tolerance, z])
+    // pull handle
+    translate([x / 2 - indent_width / 2 - fit_tolerance, y - (2 * fit_tolerance), 0])
       rotate([0, 90, 0])
-      cylinder(h=x / 4, r=2*fit_tolerance);
+      cylinder(h=x / 4, r=3*fit_tolerance);
   }
 }
 
