@@ -39,6 +39,38 @@ module corner_post(h, r) {
   }
 }
 
+module lid_base(x, y, z, slot_depth=1.5) {
+  /*
+  cube([10,7,5]);
+  CubePoints = [
+  [  0,  0,  0 ],  //0
+  [ 10,  0,  0 ],  //1
+  [ 10,  7,  0 ],  //2
+  [  0,  7,  0 ],  //3
+  [  0,  0,  5 ],  //4
+  [ 10,  0,  5 ],  //5
+  [ 10,  7,  5 ],  //6
+  [  0,  7,  5 ]]; //7
+  */
+  color("red")
+    polyhedron([// bottom
+                [0, 0, 0],
+                [x, 0, 0],
+                [x, y, 0],
+                [0, y, 0],
+                // top
+                [slot_depth, 0, z],
+                [x - slot_depth, 0, z],
+                [x - slot_depth, y, z],
+                [slot_depth, y, z]],
+               [[0,1,2,3],
+                [4,5,1,0],
+                [7,6,5,4],
+                [5,6,2,1],
+                [6,7,3,2],
+                [7,4,0,3]]);
+}
+
 module project_box(x, y,
                    above=20,
                    below=10,
@@ -47,9 +79,12 @@ module project_box(x, y,
                    corner_radius=3,
                    support_radius=5,
                    wall_width=3) {
-  height=board_thickness + above + below + (fit_tolerance * 2);
   width=board_x + (fit_tolerance * 2);
   depth=board_y + (fit_tolerance * 2);
+  lid_width = width + wall_width; // Extends halfway into each side wall
+  lid_depth = depth + wall_width; // Extends out of one wall
+  lid_height = wall_width;        // Replaces most of the top wall
+  height=board_thickness + above + below + (fit_tolerance * 2) + lid_height;
 
   // container
   difference() {
@@ -59,6 +94,10 @@ module project_box(x, y,
                  r=corner_radius);
     translate([wall_width,wall_width,wall_width])
       cube([width, depth, height + (wall_width * 2)]);
+    // lid slot
+    translate([wall_width / 2, wall_width, height + wall_width + 0.001]) {
+      lid_base(lid_width, lid_depth, lid_height);
+    }
   }
 
   // supports
