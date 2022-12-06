@@ -1,12 +1,13 @@
 /* Project box
 
-A parametric box for electronics projects using perforated circuit boards. The
-board is held above the bottom of the box by four corner supports, and snaps
-into place to hold it snugly while allowing easy removal.
+   A parametric box for electronics projects using perforated circuit boards. The
+   board is held above the bottom of the box by four corner supports, and snaps
+   into place to hold it snugly while allowing easy removal.
 */
 
 $fn=50;
 
+mode = "case";         // ["case", "lid", "all"]
 board_x = 50;
 board_y = 70;
 board_thickness = 1;   // [1:10]
@@ -58,6 +59,21 @@ module lid_base(x, y, z, slot_depth=1.5) {
               [7,4,0,3]]);
 }
 
+module lid(x, y, z, slot_depth=1.5, wall_width=3, fit_tolerance=0.5) {
+  indent_width = x / 4;
+  difference() {
+    union() {
+      lid_base(x, y, z, slot_depth);
+      translate([x / 2 - indent_width / 2 - fit_tolerance, y - wall_width - fit_tolerance, 0])
+        rotate([0, 90, 0])
+        cylinder(h=x / 4, r=2*fit_tolerance);
+    }
+    translate([x / 2 - indent_width / 2 - fit_tolerance, y - wall_width - fit_tolerance, z])
+      rotate([0, 90, 0])
+      cylinder(h=x / 4, r=2*fit_tolerance);
+  }
+}
+
 module project_box(x, y,
                    above=20,
                    below=10,
@@ -65,7 +81,8 @@ module project_box(x, y,
                    fit_tolerance=0.5,
                    corner_radius=3,
                    support_radius=5,
-                   wall_width=3) {
+                   wall_width=3,
+                   mode="case") {
   width=board_x + (fit_tolerance * 2);
   depth=board_y + (fit_tolerance * 2);
   lid_width = width + wall_width; // Extends halfway into each side wall
@@ -73,47 +90,61 @@ module project_box(x, y,
   lid_height = wall_width;        // Replaces most of the top wall
   height=board_thickness + above + below + (fit_tolerance * 2) + lid_height;
 
-  // container
-  difference() {
-    _rounded_box(h=height + (wall_width * 2),
-                 w=width + (wall_width * 2),
-                 d=depth + (wall_width * 2),
-                 r=corner_radius);
-    translate([wall_width,wall_width,wall_width])
-      cube([width, depth, height + (wall_width * 2)]);
-    // lid slot
-    translate([wall_width / 2, wall_width, height + wall_width + 0.001]) {
-      lid_base(lid_width, lid_depth, lid_height);
+  // lid
+  if (mode == "all") {
+    translate([wall_width / 2 + fit_tolerance, wall_width + fit_tolerance, height + wall_width + fit_tolerance]) {
+      lid(lid_width - (fit_tolerance * 2), lid_depth - (fit_tolerance * 2), lid_height - (fit_tolerance * 2));
     }
+  } else if (mode == "lid") {
+    // Flip the lid and translate it into place for printing
+    translate([lid_width - (fit_tolerance * 2),0,lid_height - (fit_tolerance * 2)])
+      rotate([0, 180, 0])
+      lid(lid_width - (fit_tolerance * 2), lid_depth - (fit_tolerance * 2), lid_height - (fit_tolerance * 2));
   }
 
-  // supports
-  translate([wall_width,wall_width,wall_width]) {
-    translate([0,0,0])
-      corner_post(h=below, r=support_radius);
-    translate([width,0,0])
-      rotate([0,0,90])
-      corner_post(h=below, r=support_radius);
-    translate([0,depth,0])
-      rotate([0,0,270])
-      corner_post(h=below, r=support_radius);
-    translate([width,depth,0])
-      rotate([0,0,180])
-      corner_post(h=below, r=support_radius);
-  }
+  // case
+  if ((mode == "case") || (mode == "all")) {
+    difference() {
+      _rounded_box(h=height + (wall_width * 2),
+                   w=width + (wall_width * 2),
+                   d=depth + (wall_width * 2),
+                   r=corner_radius);
+      translate([wall_width,wall_width,wall_width])
+        cube([width, depth, height + (wall_width * 2)]);
+      // lid slot
+      translate([wall_width / 2, wall_width, height + wall_width + 0.001]) {
+        lid_base(lid_width, lid_depth, lid_height);
+      }
+    }
+
+    // supports
+    translate([wall_width,wall_width,wall_width]) {
+      translate([0,0,0])
+        corner_post(h=below, r=support_radius);
+      translate([width,0,0])
+        rotate([0,0,90])
+        corner_post(h=below, r=support_radius);
+      translate([0,depth,0])
+        rotate([0,0,270])
+        corner_post(h=below, r=support_radius);
+      translate([width,depth,0])
+        rotate([0,0,180])
+        corner_post(h=below, r=support_radius);
+    }
 
 
-  // locking nubs
-  translate([wall_width,wall_width,wall_width]) {
-    nub_size = 1;
-    nub_width = board_y / 4;
-    nub_height = below + board_thickness + (nub_size/2) + (fit_tolerance*2);
-    translate([0,board_y / 2 - nub_width / 2,nub_height])
-      rotate([270,0,0])
-      cylinder(h=nub_width, r=nub_size/2);
-    translate([width,board_y / 2 - nub_width / 2,nub_height])
-      rotate([270,0,0])
-      cylinder(h=nub_width, r=nub_size/2);
+    // locking nubs
+    translate([wall_width,wall_width,wall_width]) {
+      nub_size = fit_tolerance * 2;
+      nub_width = board_y / 4;
+      nub_height = below + board_thickness + (nub_size/2) + (fit_tolerance*2);
+      translate([0,board_y / 2 - nub_width / 2,nub_height])
+        rotate([270,0,0])
+        cylinder(h=nub_width, r=nub_size/2);
+      translate([width,board_y / 2 - nub_width / 2,nub_height])
+        rotate([270,0,0])
+        cylinder(h=nub_width, r=nub_size/2);
+    }
   }
 }
 
@@ -124,4 +155,5 @@ project_box(board_x, board_y,
             fit_tolerance=fit_tolerance,
             corner_radius=corner_radius,
             support_radius=support_radius,
-            wall_width=wall_width);
+            wall_width=wall_width,
+            mode=mode);
