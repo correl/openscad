@@ -3,6 +3,10 @@
    A parametric box for electronics projects using perforated circuit boards. The
    board is held above the bottom of the box by four corner supports, and snaps
    into place to hold it snugly while allowing easy removal.
+
+   Shapes provided as children will be used as cutouts, translated to the origin
+   point of the top of the circuit board. Modules are provided for cutting out
+   two-dimensional shapes from each wall face as well as the lid.
 */
 
 $fn=50;
@@ -29,7 +33,6 @@ module _rounded_box(h, w, d, r) {
     translate([0 + r,d - r,0])
       cylinder(h=h, r=r);
   }
-
 }
 
 module corner_post(h, r) {
@@ -93,62 +96,104 @@ module project_box(x, y,
   lid_height = wall_width;        // Replaces most of the top wall
   height=board_thickness + above + below + (fit_tolerance * 2) + lid_height;
 
-  // lid
-  if (mode == "all") {
-    translate([wall_width / 2 + fit_tolerance, wall_width + fit_tolerance, height + wall_width + fit_tolerance]) {
-      lid(lid_width - (fit_tolerance * 2), lid_depth - (fit_tolerance * 2), lid_height - (fit_tolerance * 2));
-    }
-  } else if (mode == "lid") {
-    // Flip the lid and translate it into place for printing
-    translate([lid_width - (fit_tolerance * 2),0,lid_height - (fit_tolerance * 2)])
-      rotate([0, 180, 0])
-      lid(lid_width - (fit_tolerance * 2), lid_depth - (fit_tolerance * 2), lid_height - (fit_tolerance * 2));
-  }
-
   // case
   if ((mode == "case") || (mode == "all")) {
     difference() {
-      _rounded_box(h=height + (wall_width * 2),
-                   w=width + (wall_width * 2),
-                   d=depth + (wall_width * 2),
-                   r=corner_radius);
-      translate([wall_width,wall_width,wall_width])
-        cube([width, depth, height + (wall_width * 2)]);
-      // lid slot
-      translate([wall_width / 2, wall_width, height + wall_width + 0.001]) {
-        lid_base(lid_width, lid_depth, lid_height);
+      union() {
+        // hollow shell
+        difference() {
+          _rounded_box(h=height + (wall_width * 2),
+                       w=width + (wall_width * 2),
+                       d=depth + (wall_width * 2),
+                       r=corner_radius);
+          translate([wall_width,wall_width,wall_width])
+            cube([width, depth, height + (wall_width * 2)]);
+          // lid slot
+          translate([wall_width / 2, wall_width, height + wall_width + 0.001]) {
+            lid_base(lid_width, lid_depth, lid_height);
+          }
+        }
+        // supports
+        translate([wall_width,wall_width,wall_width]) {
+          translate([0,0,0])
+            corner_post(h=below, r=support_radius);
+          translate([width,0,0])
+            rotate([0,0,90])
+            corner_post(h=below, r=support_radius);
+          translate([0,depth,0])
+            rotate([0,0,270])
+            corner_post(h=below, r=support_radius);
+          translate([width,depth,0])
+            rotate([0,0,180])
+            corner_post(h=below, r=support_radius);
+        }
+
+        // locking nubs
+        translate([wall_width,wall_width,wall_width]) {
+          nub_size = fit_tolerance * 2;
+          nub_width = board_y / 4;
+          nub_height = below + board_thickness + (nub_size/2) + (fit_tolerance*2);
+          translate([0,board_y / 2 - nub_width / 2,nub_height])
+            rotate([270,0,0])
+            cylinder(h=nub_width, r=nub_size/2);
+          translate([width,board_y / 2 - nub_width / 2,nub_height])
+            rotate([270,0,0])
+            cylinder(h=nub_width, r=nub_size/2);
+        }
+        if (mode == "all") {
+          // lid
+          translate([wall_width / 2 + fit_tolerance, wall_width + fit_tolerance, height + wall_width + fit_tolerance]) {
+            lid(lid_width - (fit_tolerance * 2), lid_depth - (fit_tolerance * 2), lid_height - (fit_tolerance * 2));
+          }
+        }
+      }
+      // cutouts
+      translate([wall_width + fit_tolerance, wall_width + fit_tolerance, wall_width + below])
+        children();
+    }
+  } else if (mode == "lid") {
+    // Flip the lid and translate it into place for printing
+    translate([lid_width - (fit_tolerance * 2),0,lid_height - (fit_tolerance * 2)]) {
+      rotate([0, 180, 0]) {
+        difference() {
+          lid(lid_width - (fit_tolerance * 2), lid_depth - (fit_tolerance * 2), lid_height - (fit_tolerance * 2));
+          translate([wall_width + fit_tolerance, wall_width + fit_tolerance, -0.001])
+            children();
+        }
       }
     }
-
-    // supports
-    translate([wall_width,wall_width,wall_width]) {
-      translate([0,0,0])
-        corner_post(h=below, r=support_radius);
-      translate([width,0,0])
-        rotate([0,0,90])
-        corner_post(h=below, r=support_radius);
-      translate([0,depth,0])
-        rotate([0,0,270])
-        corner_post(h=below, r=support_radius);
-      translate([width,depth,0])
-        rotate([0,0,180])
-        corner_post(h=below, r=support_radius);
-    }
-
-
-    // locking nubs
-    translate([wall_width,wall_width,wall_width]) {
-      nub_size = fit_tolerance * 2;
-      nub_width = board_y / 4;
-      nub_height = below + board_thickness + (nub_size/2) + (fit_tolerance*2);
-      translate([0,board_y / 2 - nub_width / 2,nub_height])
-        rotate([270,0,0])
-        cylinder(h=nub_width, r=nub_size/2);
-      translate([width,board_y / 2 - nub_width / 2,nub_height])
-        rotate([270,0,0])
-        cylinder(h=nub_width, r=nub_size/2);
-    }
   }
+}
+
+module cutout_front(volume) {
+  rotate([90, 0, 0])
+    linear_extrude(height=volume.y * 2)
+    children(0);
+}
+
+module cutout_back(volume)  {
+  translate([volume.x,0,0])
+    rotate([90, 0, 180])
+    linear_extrude(height=volume.y * 2)
+    children(0);
+}
+
+module cutout_right(volume) {
+  rotate([90, 0, 90])
+    linear_extrude(height=volume.x * 2)
+    children(0);
+}
+
+module cutout_left(volume) {
+  translate([volume.x, volume.y, 0])
+    rotate([90, 0, 270])
+    linear_extrude(height=volume.x * 2)
+    children(0);
+}
+
+module cutout_top(volume) {
+  linear_extrude(height=volume.y * 2)
+    children(0);
 }
 
 project_box(board_x, board_y,
