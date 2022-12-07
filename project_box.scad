@@ -210,7 +210,7 @@ module cutout_left(box, wall_width=3, fit_tolerance=0.5) {
 }
 
 module cutout_top(box, wall_width=3, fit_tolerance=0.5) {
-  translate([0, 0, box.z])
+  translate([0, 0 - wall_width - fit_tolerance, box.z])
     linear_extrude(height=wall_width + fit_tolerance + 0.001)
     children(0);
 }
