@@ -171,11 +171,17 @@ module project_box(box,
     translate([lid_width - (fit_tolerance * 2),0,lid_height - (fit_tolerance * 2)]) {
       rotate([0, 180, 0]) {
         difference() {
-          lid([lid_width - (fit_tolerance * 2),
-               lid_depth - (fit_tolerance * 2),
-               lid_height - (fit_tolerance * 2)]);
-          translate([wall_width + fit_tolerance, wall_width + fit_tolerance, -0.001])
-            children();
+          translate([wall_width / 2 + fit_tolerance,
+                     wall_width + fit_tolerance, 0]) {
+            lid([lid_width - (fit_tolerance * 2),
+                 lid_depth - (fit_tolerance * 2),
+                 lid_height - (fit_tolerance * 2)]);
+          }
+          translate([wall_width + fit_tolerance,
+                     wall_width + fit_tolerance,
+                     below + board_thickness - internal_height]) {
+            #children();
+          }
         }
       }
     }
