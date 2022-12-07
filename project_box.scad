@@ -92,12 +92,18 @@ module project_box(box,
                    support_radius=5,
                    wall_width=3,
                    mode="case") {
-  width=box.x + (fit_tolerance * 2);
-  depth=box.y + (fit_tolerance * 2);
-  lid_width = width + wall_width; // Extends halfway into each side wall
-  lid_depth = depth + wall_width; // Extends out of one wall
-  lid_height = wall_width;        // Replaces most of the top wall
-  height=board_thickness + box.z + below + (fit_tolerance * 2) + lid_height;
+  internal_width = box.x + (fit_tolerance * 2);  // tolerance on either side
+  internal_depth = box.y + (fit_tolerance * 2);  // tolerance on either side
+
+  internal_height = (fit_tolerance      // top tolerance
+                     + box.z            // project height
+                     + board_thickness  // board height
+                     + below            // bottom clearance
+                     + fit_tolerance);  // bottom tolerance
+
+  lid_width = internal_width + wall_width;  // Extends halfway into each side wall
+  lid_depth = internal_depth + wall_width;  // Extends out of one wall
+  lid_height = wall_width;         // Replaces most of the top wall
 
   // case
   if ((mode == "case") || (mode == "all")) {
@@ -105,14 +111,14 @@ module project_box(box,
       union() {
         // hollow shell
         difference() {
-          _rounded_box([width + (wall_width * 2),
-                       depth + (wall_width * 2),
-                       height + (wall_width * 2)],
+          _rounded_box([internal_width + (wall_width * 2),
+                        internal_depth + (wall_width * 2),
+                        internal_height + (wall_width * 2)],
                        r=corner_radius);
-          translate([wall_width,wall_width,wall_width])
-            cube([width, depth, height + (wall_width * 2)]);
+          translate([wall_width,wall_width,wall_width + 0.002])
+            cube([internal_width, internal_depth, internal_height]);
           // lid slot
-          translate([wall_width / 2, wall_width, height + wall_width + 0.001]) {
+          translate([wall_width / 2, wall_width, internal_height + wall_width + 0.001]) {
             lid_base([lid_width, lid_depth, lid_height]);
           }
         }
@@ -120,13 +126,13 @@ module project_box(box,
         translate([wall_width,wall_width,wall_width]) {
           translate([0,0,0])
             corner_post(h=below, r=support_radius);
-          translate([width,0,0])
+          translate([internal_width, 0, 0])
             rotate([0,0,90])
             corner_post(h=below, r=support_radius);
-          translate([0,depth,0])
+          translate([0,internal_depth, 0])
             rotate([0,0,270])
             corner_post(h=below, r=support_radius);
-          translate([width,depth,0])
+          translate([internal_width, internal_depth, 0])
             rotate([0,0,180])
             corner_post(h=below, r=support_radius);
         }
@@ -139,7 +145,7 @@ module project_box(box,
           translate([0,box.y / 2 - nub_width / 2,nub_height])
             rotate([270,0,0])
             cylinder(h=nub_width, r=nub_size/2);
-          translate([width,box.y / 2 - nub_width / 2,nub_height])
+          translate([internal_width,box.y / 2 - nub_width / 2,nub_height])
             rotate([270,0,0])
             cylinder(h=nub_width, r=nub_size/2);
         }
@@ -147,7 +153,7 @@ module project_box(box,
           // lid
           translate([wall_width / 2 + fit_tolerance,
                      wall_width + fit_tolerance,
-                     height + wall_width + fit_tolerance]) {
+                     internal_height + wall_width + fit_tolerance]) {
             lid([lid_width - (fit_tolerance * 2),
                  lid_depth - (fit_tolerance * 2),
                  lid_height - (fit_tolerance * 2)]);
@@ -155,7 +161,9 @@ module project_box(box,
         }
       }
       // cutouts
-      translate([wall_width + fit_tolerance, wall_width + fit_tolerance, wall_width + below])
+      translate([wall_width + fit_tolerance,
+                 wall_width + fit_tolerance,
+                 fit_tolerance + wall_width + below + board_thickness])
         children();
     }
   } else if (mode == "lid") {
@@ -174,34 +182,36 @@ module project_box(box,
   }
 }
 
-module cutout_front(box) {
+module cutout_front(box, wall_width=3, fit_tolerance=0.5) {
   rotate([90, 0, 0])
-    linear_extrude(height=box.y * 2)
+    linear_extrude(height=wall_width + fit_tolerance + 0.001)
     children(0);
 }
 
-module cutout_back(box)  {
-  translate([box.x,0,0])
+module cutout_back(box, wall_width=3, fit_tolerance=0.5)  {
+  translate([box.x,box.y,0])
     rotate([90, 0, 180])
-    linear_extrude(height=box.y * 2)
+    linear_extrude(height=wall_width + fit_tolerance + .001)
     children(0);
 }
 
-module cutout_right(box) {
-  rotate([90, 0, 90])
-    linear_extrude(height=box.x * 2)
+module cutout_right(box, wall_width=3, fit_tolerance=0.5) {
+  translate([box.x,0,0])
+    rotate([90, 0, 90])
+    linear_extrude(height=wall_width + fit_tolerance + 0.001)
     children(0);
 }
 
-module cutout_left(box) {
-  translate([box.x, box.y, 0])
+module cutout_left(box, wall_width=3, fit_tolerance=0.5) {
+  translate([0, box.y, 0])
     rotate([90, 0, 270])
-    linear_extrude(height=box.x * 2)
+    linear_extrude(height=wall_width + fit_tolerance + 0.001)
     children(0);
 }
 
-module cutout_top(box) {
-  linear_extrude(height=box.y * 2)
+module cutout_top(box, wall_width=3, fit_tolerance=0.5) {
+  translate([0, 0, box.z])
+    linear_extrude(height=wall_width + fit_tolerance + 0.001)
     children(0);
 }
 
