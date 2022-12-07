@@ -34,8 +34,7 @@ module cutouts() {
     square([15,10]);
 }
 
-project_box(x, y,
-            above=z,
+project_box([x, y, z],
             below=10,
             mode=mode) {
   cutouts();
