@@ -7,3 +7,29 @@ My collection of 3D-printable models designed using [[https://openscad.org/][Ope
 A parametric box for electronics projects using perforated circuit boards. The
 board is held above the bottom of the box by four corner supports, and snaps
 into place to hold it snugly while allowing easy removal.
+
+#+caption: Generating a project box for a 5x7cm board with front and back cutouts.
+#+begin_src scad :file project-box.png :eval no-export :exports both
+  use <correl/project_box.scad>
+  $fn=50;
+
+  mode = "case"; // ["case", "lid", "all"]
+  box = [50,  // Board width
+         70,  // Board length
+         20]; // Project height
+
+  rotate([0,0,180])
+  project_box(box,
+              below=10,
+              mode=mode) {
+    cutout_front(box)
+      translate([10, 5, 0])
+      square([15,10]);
+    cutout_back(box)
+      translate([10, 5, 0])
+      circle(5);
+  }
+#+end_src
+
+#+RESULTS:
+[[file:project-box.png]]
