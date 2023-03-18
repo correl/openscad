@@ -33,3 +33,24 @@ into place to hold it snugly while allowing easy removal.
 
 #+RESULTS:
 [[file:project-box.png]]
+
+* [[file:ducky-shine-6-usbc.scad][Ducky Shine 6 USB-C Connector Housing]]
+A replacement housing for the USB connector in a [[https://www.duckychannel.com.tw/en/Ducky-Shine6][Ducky Shine 6 keyboard]] that
+secures the connector and its wiring within the keyboard's case. The keyboard
+originally ships with a USB Micro-B connector suspended in a solid connector
+with the same profile. This makes it impossible to re-use the existing housing,
+so this one is modeled to fit the cable along with a compact JRC-B008 USB-C
+breakout board and screw into place. The model is divided into top and bottom
+pieces that can be glued together once the board is in place and soldered.
+
+#+CAPTION: The full model, with top and bottom parts connected.
+[[file:ducky-shine-6-usbc.png]]
+
+#+CAPTION: A JRC-B008 USB-C breakout board
+[[file:51diC44ScpL._AC_SX466_.jpg]]
+
+#+CAPTION: The original USB Micro-B connector and housing.
+[[file:PXL_20230317_205351346.jpg]]
+
+#+CAPTION: The new housing with a USB-C connector, printed in green PLA+.
+[[file:PXL_20230318_044352351.jpg]]
